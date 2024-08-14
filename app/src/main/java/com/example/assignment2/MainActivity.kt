@@ -110,7 +110,7 @@ fun Content(navController: NavHostController, viewModel: TodoListViewModel = vie
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
-                    .background(MaterialTheme.colorScheme.background) // This will apply the pink background
+                    .background(MaterialTheme.colorScheme.background)
             ) {
                 TodoList(todoItems, viewModel)
             }
