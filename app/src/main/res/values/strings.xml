@@ -1,0 +1,26 @@
+<resources>
+    <!-- App Name -->
+    <string name="app_name">Assignment2</string>
+
+    <!-- Button and Label Texts -->
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
+    <string name="new_todo">New Task</string>
+
+    <!-- Error Messages -->
+    <string name="error_message">Please enter a valid task description.</string>
+
+    <!-- Additional strings -->
+    <string name="login">Login</string>
+    <string name="create_account">Create Account</string>
+    <string name="email_address">Email Address</string>
+    <string name="password">Password</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="name">Name</string>
+    <string name="all_fields_required">All fields are required</string>
+    <string name="password_length_error">Password must be at least 8 characters long</string>
+    <string name="password_mismatch_error">Passwords do not match</string>
+    <string name="account_creation_failed">Account creation failed. Please try again.</string>
+    <string name="login_failed">Login failed. Please check your credentials.</string>
+    <string name="logout">Logout</string>
+</resources>
