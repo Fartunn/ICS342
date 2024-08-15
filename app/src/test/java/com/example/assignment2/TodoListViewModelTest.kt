@@ -1,59 +1,60 @@
 package com.example.assignment2
 
 import android.app.Application
-import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import io.mockk.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.test.*
-import org.junit.After
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.mockk
+import kotlinx.coroutines.test.runTest
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 
+@ExtendWith(CoroutinesTestExtension::class, InstantExecutorExtension::class)
 class TodoListViewModelTest {
 
-    @get:Rule
-    val instantTaskExecutorRule = InstantTaskExecutorRule()
-
-    private lateinit var viewModel: TodoListViewModel
     private val mockApiService = mockk<TodoApiService>()
-    private val testDispatcher = StandardTestDispatcher()
+    private val mockApplication = mockk<Application>(relaxed = true)
+    private val viewModel = TodoListViewModel(mockApplication)
 
-    @Before
-    fun setUp() {
-        Dispatchers.setMain(testDispatcher) // Set the main dispatcher for testing
-        val mockApplication = mockk<Application>(relaxed = true) // Create a relaxed mock of the Application
-        viewModel = TodoListViewModel(mockApplication)
-        mockkObject(ApiService)
-        every { ApiService.apiService } returns mockApiService
-    }
+    @Test
+    fun `should fetchTodos successfully when API call is successful`() = runTest {
+        val mockTodos = listOf(mockk<TodoItem>(relaxed = true))
+        coEvery { mockApiService.getTodos(any(), any(), any()) } returns mockTodos
 
-    @After
-    fun tearDown() {
-        Dispatchers.resetMain() // Reset the main dispatcher
-        unmockkAll()
+        viewModel.fetchTodos()
+
+        coVerify(exactly = 1) { mockApiService.getTodos(any(), any(), any()) }
+        assertEquals(mockTodos, viewModel.todos.value)
     }
 
     @Test
-    fun `fetchTodos should succeed when valid user and token are provided`() = runTest {
-        val todosList = listOf(TodoItem(1, "Test Todo", false))
-        coEvery { mockApiService.getTodos(any(), any(), any()) } returns todosList
+    fun `should return error when fetching todos fails`() = runTest {
+        coEvery { mockApiService.getTodos(any(), any(), any()) } throws Exception("Network error")
 
         viewModel.fetchTodos()
-        assert(viewModel.todos.value == todosList)
 
-        coVerify { mockApiService.getTodos(any(), any(), any()) }
+        coVerify(exactly = 1) { mockApiService.getTodos(any(), any(), any()) }
+        assertEquals("Failed to fetch todos", viewModel.error.value)
     }
 
     @Test
-    fun `fetchTodos should fail when an error occurs`() = runTest {
-        coEvery { mockApiService.getTodos(any(), any(), any()) } throws Exception("Network Error")
+    fun `should createTodo successfully when API call is successful`() = runTest {
+        val newTodo = mockk<TodoItem>(relaxed = true)
+        coEvery { mockApiService.createTodo(any(), any(), any(), any()) } returns newTodo
 
-        viewModel.fetchTodos()
-        assert(viewModel.error.value == "Failed to fetch todos")
+        viewModel.createTodo("New Todo Item")
 
-        coVerify { mockApiService.getTodos(any(), any(), any()) }
+        coVerify(exactly = 1) { mockApiService.createTodo(any(), any(), any(), any()) }
+        coVerify(exactly = 1) { mockApiService.getTodos(any(), any(), any()) }
     }
 
-    // Additional tests for createTodo, updateTodo, etc.
+    @Test
+    fun `should return error when creating todo fails`() = runTest {
+        coEvery { mockApiService.createTodo(any(), any(), any(), any()) } throws Exception("Network error")
+
+        viewModel.createTodo("New Todo Item")
+
+        coVerify(exactly = 1) { mockApiService.createTodo(any(), any(), any(), any()) }
+        assertEquals("Failed to create todo: Network error", viewModel.error.value)
+    }
 }
