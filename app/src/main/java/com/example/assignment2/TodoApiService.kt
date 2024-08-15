@@ -9,6 +9,7 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface TodoApiService {
+
     @POST("/api/users/register")
     suspend fun registerUser(
         @Query("apikey") apiKey: String,

@@ -25,24 +25,20 @@ class TodoListViewModel(application: Application) : AndroidViewModel(application
         val token = SharedPreferencesManager.getUserToken(getApplication())
 
         if (userId == null || token == null) {
-            Log.e("TodoListViewModel", "User ID or token is null. Cannot fetch todos.")
             _error.postValue("User ID or token is null. Cannot fetch todos.")
             return
         }
 
         viewModelScope.launch {
             try {
-                Log.d("TodoListViewModel", "Fetching todos for user: $userId with token: $token")
                 val todosList = apiService.getTodos(
                     userId = userId,
                     bearerToken = "Bearer $token",
-                    apiKey = "c996c7dd-4fcc-48ce-90c3-bf22321cf290",
+                    apiKey = "c996c7dd-4fcc-48ce-90c3-bf22321cf290"
                 )
-                Log.d("TodoListViewModel", "Fetched todos: $todosList")
                 _todos.postValue(todosList)
             } catch (e: Exception) {
-                Log.e("TodoListViewModel", "Error fetching todos: ${e.message}")
-                _error.postValue("Failed to fetch todos")
+                _error.postValue("Failed to fetch todos: ${e.message}")
             }
         }
     }
@@ -52,7 +48,6 @@ class TodoListViewModel(application: Application) : AndroidViewModel(application
         val token = SharedPreferencesManager.getUserToken(getApplication())
 
         if (userId == null || token == null) {
-            Log.e("TodoListViewModel", "User ID or token is null. Cannot create todo.")
             _error.postValue("User ID or token is null. Cannot create todo.")
             return
         }
@@ -60,20 +55,14 @@ class TodoListViewModel(application: Application) : AndroidViewModel(application
         viewModelScope.launch {
             try {
                 val createTodoRequest = CreateTodoRequest(description)
-                Log.d("TodoListViewModel", "Creating todo with request: $createTodoRequest")
                 val newTodo = apiService.createTodo(
                     userId = userId,
                     apiKey = "c996c7dd-4fcc-48ce-90c3-bf22321cf290",
                     bearerToken = "Bearer $token",
                     request = createTodoRequest
                 )
-                Log.d("TodoListViewModel", "Created todo response: $newTodo")
                 _todos.postValue(_todos.value?.plus(newTodo))
-            } catch (e: retrofit2.HttpException) {
-                Log.e("TodoListViewModel", "HTTP error creating todo: ${e.code()} ${e.message()}")
-                _error.postValue("HTTP error creating todo: ${e.message()}")
             } catch (e: Exception) {
-                Log.e("TodoListViewModel", "Error creating todo: ${e.message}")
                 _error.postValue("Failed to create todo: ${e.message}")
             }
         }
@@ -88,7 +77,6 @@ class TodoListViewModel(application: Application) : AndroidViewModel(application
         val token = SharedPreferencesManager.getUserToken(getApplication())
 
         if (userId == null || token == null) {
-            Log.e("TodoListViewModel", "User ID or token is null. Cannot update todo.")
             _error.postValue("User ID or token is null. Cannot update todo.")
             return
         }
@@ -96,7 +84,6 @@ class TodoListViewModel(application: Application) : AndroidViewModel(application
         viewModelScope.launch {
             try {
                 val updateTodoRequest = UpdateTodoRequest(description, completed)
-                Log.d("TodoListViewModel", "Updating todo with request: $updateTodoRequest")
                 val updatedTodo = apiService.editTodo(
                     userId = userId,
                     todoId = todoId,
@@ -104,15 +91,10 @@ class TodoListViewModel(application: Application) : AndroidViewModel(application
                     apiKey = "c996c7dd-4fcc-48ce-90c3-bf22321cf290",
                     request = updateTodoRequest
                 )
-                Log.d("TodoListViewModel", "Updated todo response: $updatedTodo")
                 _todos.postValue(_todos.value?.map {
                     if (it.id == todoId) updatedTodo else it
                 })
-            } catch (e: retrofit2.HttpException) {
-                Log.e("TodoListViewModel", "HTTP error updating todo: ${e.code()} ${e.message()}")
-                _error.postValue("HTTP error updating todo: ${e.message()}")
             } catch (e: Exception) {
-                Log.e("TodoListViewModel", "Error updating todo: ${e.message}")
                 _error.postValue("Failed to update todo: ${e.message}")
             }
         }
